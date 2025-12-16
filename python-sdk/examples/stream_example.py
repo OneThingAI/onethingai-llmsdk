@@ -1,12 +1,12 @@
 """
 流式对话示例
 
-演示如何使用 OneThing AI SDK 进行流式对话，实时接收响应。
+演示如何使用 OneThing AI LLM SDK 进行流式对话，实时接收响应。
 """
 
 import os
 import json
-from onethingai import OnethingAI
+from onething_llm import OnethingLLM
 
 
 def parse_stream_line(line: str) -> dict:
@@ -68,10 +68,10 @@ def extract_content_from_stream_data(data: dict) -> str:
 def stream_chat_example():
     """流式聊天示例"""
     # 设置 API 密钥
-    api_key = os.environ.get("ONETHINGAI_API_KEY", "your-api-key")
+    api_key = os.environ.get("ONETHING_LLM_API_KEY", "your-api-key")
     
     # 创建客户端
-    client = OnethingAI(api_key=api_key)
+    client = OnethingLLM(api_key=api_key)
     
     print(" 流式聊天对话:")
     print("问题: 请详细介绍一下人工智能的发展历史")
@@ -213,7 +213,7 @@ def interactive_stream_chat(client):
 
 def main():
     """主函数"""
-    print("🌊 OneThing AI SDK 流式请求示例集合\n")
+    print("🌊 OneThing AI LLM SDK 流式请求示例集合\n")
     
     try:
         # 运行流式聊天示例

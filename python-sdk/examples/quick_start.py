@@ -1,23 +1,21 @@
 """
 快速开始示例
 
-最简单的 OneThing AI SDK 使用示例。
+最简单的 OneThing AI LLM SDK 使用示例。
 """
 
 import os
-from onethingai import OnethingAI
+from onething_llm import OnethingLLM
 
 
 def main():
     # 设置 API 密钥
-    api_key = os.environ.get("ONETHINGAI_API_KEY", "your-api-key")
+    api_key = os.environ.get("ONETHING_LLM_API_KEY", "your-api-key")
     
     # 创建客户端
-    client = OnethingAI(api_key=api_key)
-    
-    print("🚀 OneThing AI SDK 快速开始\n")
-    
-    # 文本生成
+    client = OnethingLLM(api_key=api_key)
+
+    print("🚀 OneThing AI LLM SDK 快速开始\n")    # 文本生成
     print("💬 聊天对话:")
     try:
         # 使用自定义文本接口

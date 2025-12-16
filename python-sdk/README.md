@@ -1,6 +1,6 @@
-# OneThing AI Python SDK
+# OneThing AI LLM Python SDK
 
-OneThing AI Python SDK 提供对 OneThing AI 平台的完整访问，支持文本、图片和视频生成。
+OneThing AI LLM Python SDK 提供对 OneThing AI 平台的完整访问，支持文本、图片和视频生成。
 
 ## 安装
 
@@ -11,10 +11,10 @@ pip install git+https://github.com/onethingai/onethingai-llmsdk.git#subdirectory
 ## 快速开始
 
 ```python
-from onethingai import OnethingAI
+from onething_llm import OnethingLLM
 
 # 初始化客户端
-client = OnethingAI(api_key="your-api-key")
+client = OnethingLLM(api_key="your-api-key")
 ```
 
 ## 文本生成
@@ -70,26 +70,38 @@ if response.data and response.data.result:
 ## 视频生成
 
 ```python
-# 文本生成视频
+# 文本生成视频（异步操作）
 response = client.videos.text_to_video(
     model="sora-2",
     prompt="一朵花在阳光下绽放"
 )
 
-# 获取任务ID并等待完成
+# 获取任务ID
 if response.data:
     job_id = response.data.job_id
-    result = client.videos.wait(job_id)
+    print(f"任务ID: {job_id}")
+    print(f"状态: {response.data.status}")  # 通常为 "processing"
     
-    if result.data and result.data.result:
-        video_url = result.data.result.data[0].url
-        print(f"视频URL: {video_url}")
+    # 可以稍后使用任务ID查询结果
+    result = client.videos.get_job_status(job_id)
+    print(f"任务进度: {result.data.progress}%")
 ```
+
+**注意**: 视频生成仅支持异步请求。提交请求后会立即返回任务ID，需要后续使用 `get_job_status()` 或 `wait()` 方法查询结果。
+
+```python
+# 等待任务完成
+result = client.videos.wait(
+    job_id=job_id,
+    max_attempts=60,      # 最多查询60次
+    interval=5.0,         # 每5秒查询一次
+    timeout=600.0         # 最多等待600秒
+)
 
 ## 配置
 
 ```python
-client = OnethingAI(
+client = OnethingLLM(
     api_key="your-api-key",
     base_url="https://api-model.onethingai.com/v2",  # 默认值
     timeout=60.0,
@@ -100,18 +112,18 @@ client = OnethingAI(
 ## 环境变量
 
 ```bash
-export ONETHINGAI_API_KEY="your-api-key"
-export ONETHINGAI_BASE_URL="https://api-model.onethingai.com/v2"
+export ONETHING_LLM_API_KEY="your-api-key"
+export ONETHING_LLM_BASE_URL="https://api-model.onethingai.com/v2"
 ```
 
 ## 异步支持
 
 ```python
 import asyncio
-from onethingai import AsyncOnethingAI
+from onething_llm import AsyncOnethingLLM
 
 async def main():
-    async with AsyncOnethingAI(api_key="your-api-key") as client:
+    async with AsyncOnethingLLM(api_key="your-api-key") as client:
         # 只有图片和视频支持异步
         response = await client.images.generate(
             model="doubao-seedream-4-0-250828",

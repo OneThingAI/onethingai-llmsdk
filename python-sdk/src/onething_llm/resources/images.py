@@ -6,8 +6,8 @@ OneThing AI SDK 图片生成资源模块。
 
 from typing import Any, Callable, Dict, Iterator, List, Optional, Union
 
-from onethingai.transport import Transport, AsyncTransport
-from onethingai.types import (
+from onething_llm.transport import Transport, AsyncTransport
+from onething_llm.types import (
     ImageDataResponse,
     ImageExtra,
     ImageJobType,
@@ -23,8 +23,8 @@ from onethingai.types import (
     Status,
     SyncMode,
 )
-from onethingai.stream import StreamReader, AsyncStreamReader
-from onethingai.errors import ValidationError
+from onething_llm.stream import StreamReader, AsyncStreamReader
+from onething_llm.errors import ValidationError
 
 
 class Images:
@@ -246,11 +246,11 @@ class Images:
 
         while True:
             if max_attempts > 0 and attempts >= max_attempts:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"超过最大轮询次数 ({max_attempts})")
 
             if timeout > 0 and (time.time() - start_time) > timeout:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"轮询超时 ({timeout}秒)")
 
             response = self.get_job_status(job_id)
@@ -262,7 +262,7 @@ class Images:
                 return response
 
             if response.data.is_failed():
-                from onethingai.errors import JobError
+                from onething_llm.errors import JobError
                 raise JobError(
                     f"任务失败: {response.data.error}",
                     job_id=job_id,
@@ -543,11 +543,11 @@ class AsyncImages:
 
         while True:
             if max_attempts > 0 and attempts >= max_attempts:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"超过最大轮询次数 ({max_attempts})")
 
             if timeout > 0 and (time.time() - start_time) > timeout:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"轮询超时 ({timeout}秒)")
 
             response = await self.get_job_status(job_id)
@@ -559,7 +559,7 @@ class AsyncImages:
                 return response
 
             if response.data.is_failed():
-                from onethingai.errors import JobError
+                from onething_llm.errors import JobError
                 raise JobError(
                     f"任务失败: {response.data.error}",
                     job_id=job_id,

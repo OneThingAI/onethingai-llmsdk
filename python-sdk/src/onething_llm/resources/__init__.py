@@ -1,10 +1,10 @@
 """
-OneThing AI SDK 资源模块。
+OneThing AI LLM SDK 资源模块。
 """
 
-from onethingai.resources.text import Text
-from onethingai.resources.images import Images, AsyncImages
-from onethingai.resources.videos import Videos, AsyncVideos
+from onething_llm.resources.text import Text
+from onething_llm.resources.images import Images, AsyncImages
+from onething_llm.resources.videos import Videos, AsyncVideos
 
 __all__ = [
     "Text",             # 文本生成资源（

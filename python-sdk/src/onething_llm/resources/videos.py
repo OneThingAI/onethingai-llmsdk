@@ -1,13 +1,14 @@
 """
 OneThing AI SDK 视频生成资源模块。
 
-提供同步和异步的视频生成功能，支持文生视频和图生视频。
+提供视频生成功能，支持文生视频和图生视频。
+注意：视频生成仅支持异步模式，会立即返回任务ID，需要后续轮询查询结果。
 """
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from onethingai.transport import Transport, AsyncTransport
-from onethingai.types import (
+from onething_llm.transport import Transport, AsyncTransport
+from onething_llm.types import (
     InputImage,
     InputVideo,
     Status,
@@ -20,14 +21,16 @@ from onethingai.types import (
     VideoResult,
     VideoResultContainer,
 )
-from onethingai.errors import ValidationError
+from onething_llm.errors import ValidationError
 
 
 class Videos:
     """
     同步视频生成资源类。
     
-    提供文生视频、图生视频等功能的同步实现。
+    提供文生视频、图生视频等功能。
+    注意：所有视频生成操作均为异步操作，会立即返回任务ID。
+    使用 get_job_status() 或 wait() 方法查询任务结果。
     """
 
     def __init__(self, transport: Transport) -> None:
@@ -121,7 +124,40 @@ class Videos:
         extra: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> VideoResponse:
-        """从文本生成视频。"""
+        """从文本生成视频。
+        
+        本方法仅支持异步模式，会立即返回任务ID。需要使用 get_job_status() 或 wait() 方法
+        来查询或等待生成结果。
+        
+        Args:
+            model: 模型名称 (e.g., "sora-2")
+            prompt: 视频生成提示词
+            sync_mode: 同步模式 (仅支持 ASYNC，默认值)
+            n: 生成数量
+            width: 视频宽度 (默认 1024)
+            height: 视频高度 (默认 576)
+            duration: 视频时长（秒）(默认 5)
+            fps: 帧率 (默认 24)
+            seed: 随机种子
+            audio_enabled: 是否启用音频
+            negative_prompt: 负面提示词
+            extra: 其他参数
+            
+        Returns:
+            VideoResponse: 包含 job_id 的响应对象
+            
+        Example:
+            response = client.videos.text_to_video(
+                model="sora-2",
+                prompt="A beautiful sunset over the ocean",
+                width=1024,
+                height=576,
+                duration=5
+            )
+            job_id = response.data[0].id
+            # 使用 wait() 等待结果
+            result = client.videos.wait(job_id)
+        """
         return self.generate(
             model=model,
             prompt=prompt,
@@ -157,7 +193,29 @@ class Videos:
         extra: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> VideoResponse:
-        """从图片生成视频。"""
+        """从图片生成视频。
+        
+        本方法仅支持异步模式，会立即返回任务ID。需要使用 get_job_status() 或 wait() 方法
+        来查询或等待生成结果。
+        
+        Args:
+            model: 模型名称 (e.g., "sora-2")
+            prompt: 视频生成提示词
+            input_images: 输入图片列表
+            sync_mode: 同步模式 (仅支持 ASYNC，默认值)
+            n: 生成数量
+            width: 视频宽度
+            height: 视频高度
+            duration: 视频时长（秒）
+            fps: 帧率
+            seed: 随机种子
+            audio_enabled: 是否启用音频
+            negative_prompt: 负面提示词
+            extra: 其他参数
+            
+        Returns:
+            VideoResponse: 包含 job_id 的响应对象
+        """
         return self.generate(
             model=model,
             prompt=prompt,
@@ -177,7 +235,17 @@ class Videos:
         )
 
     def get_job_status(self, job_id: str) -> VideoResponse:
-        """获取视频生成任务的状态。"""
+        """获取视频生成任务的状态。
+        
+        查询异步视频生成任务的当前状态。可用于轮询检查任务是否完成，
+        或使用 wait() 方法自动等待任务完成。
+        
+        Args:
+            job_id: 视频生成任务的ID
+            
+        Returns:
+            VideoResponse: 包含任务状态和结果的响应对象
+        """
         response = self._transport.request("GET", f"/generation/job/{job_id}", None)
         return self._parse_response(response)
 
@@ -192,16 +260,28 @@ class Videos:
     ) -> VideoResponse:
         """
         等待视频任务完成。
+        
+        这是一个阻塞调用，会轮询任务状态直到任务完成或发生超时。推荐用于等待
+        text_to_video() 或 image_to_video() 返回的任务ID。
 
         参数:
-            job_id: 任务标识符
+            job_id: 视频生成任务的ID
             max_attempts: 最大轮询次数（0表示无限制）
             interval: 轮询间隔（秒，视频默认5秒）
             timeout: 最大等待时间（秒，视频默认10分钟）
-            on_progress: 进度回调函数
+            on_progress: 进度回调函数，接收 (progress: float, status: Status) 参数
         
         返回:
             VideoResponse: 完成后的任务响应
+            
+        Example:
+            response = client.videos.text_to_video(
+                model="sora-2",
+                prompt="A beautiful sunset over the ocean"
+            )
+            job_id = response.data[0].id
+            # 等待任务完成
+            result = client.videos.wait(job_id)
         """
         import time
         
@@ -210,11 +290,11 @@ class Videos:
 
         while True:
             if max_attempts > 0 and attempts >= max_attempts:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"超过最大轮询次数 ({max_attempts})")
 
             if timeout > 0 and (time.time() - start_time) > timeout:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"轮询超时 ({timeout}秒)")
 
             response = self.get_job_status(job_id)
@@ -226,7 +306,7 @@ class Videos:
                 return response
 
             if response.data.is_failed():
-                from onethingai.errors import JobError
+                from onething_llm.errors import JobError
                 raise JobError(
                     f"任务失败: {response.data.error}",
                     job_id=job_id,
@@ -344,8 +424,9 @@ class Videos:
         result = None
         if "result" in data and data["result"]:
             result_data = data["result"].get("data", [])
-            parsed_results = [VideoResult(**r) for r in result_data]
-            result = VideoResultContainer(data=parsed_results)
+            if result_data:  # 确保 result_data 不为 None
+                parsed_results = [VideoResult(**r) for r in result_data]
+                result = VideoResultContainer(data=parsed_results)
 
         video_data = VideoDataResponse(
             job_id=data.get("job_id", ""),
@@ -368,7 +449,8 @@ class AsyncVideos:
     """
     异步视频生成资源类。
     
-    提供文生视频、图生视频等功能的异步实现。
+    提供文生视频、图生视频等功能的异步实现。所有视频生成操作都是异步的，
+    会立即返回任务ID，需要使用 wait() 或 get_job_status() 方法来查询或等待结果。
     """
 
     def __init__(self, transport: AsyncTransport) -> None:
@@ -440,7 +522,40 @@ class AsyncVideos:
         extra: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> VideoResponse:
-        """异步从文本生成视频。"""
+        """异步从文本生成视频。
+        
+        本方法仅支持异步模式，会立即返回任务ID。需要使用 get_job_status() 或 wait() 方法
+        来查询或等待生成结果。
+        
+        Args:
+            model: 模型名称 (e.g., "sora-2")
+            prompt: 视频生成提示词
+            sync_mode: 同步模式 (仅支持 ASYNC，默认值)
+            n: 生成数量
+            width: 视频宽度 (默认 1024)
+            height: 视频高度 (默认 576)
+            duration: 视频时长（秒）(默认 5)
+            fps: 帧率 (默认 24)
+            seed: 随机种子
+            audio_enabled: 是否启用音频
+            negative_prompt: 负面提示词
+            extra: 其他参数
+            
+        Returns:
+            VideoResponse: 包含 job_id 的响应对象
+            
+        Example:
+            response = await client.videos.text_to_video(
+                model="sora-2",
+                prompt="A beautiful sunset over the ocean",
+                width=1024,
+                height=576,
+                duration=5
+            )
+            job_id = response.data[0].id
+            # 使用 wait() 异步等待结果
+            result = await client.videos.wait(job_id)
+        """
         return await self.generate(
             model=model,
             prompt=prompt,
@@ -476,7 +591,29 @@ class AsyncVideos:
         extra: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> VideoResponse:
-        """异步从图片生成视频。"""
+        """异步从图片生成视频。
+        
+        本方法仅支持异步模式，会立即返回任务ID。需要使用 get_job_status() 或 wait() 方法
+        来查询或等待生成结果。
+        
+        Args:
+            model: 模型名称 (e.g., "sora-2")
+            prompt: 视频生成提示词
+            input_images: 输入图片列表
+            sync_mode: 同步模式 (仅支持 ASYNC，默认值)
+            n: 生成数量
+            width: 视频宽度
+            height: 视频高度
+            duration: 视频时长（秒）
+            fps: 帧率
+            seed: 随机种子
+            audio_enabled: 是否启用音频
+            negative_prompt: 负面提示词
+            extra: 其他参数
+            
+        Returns:
+            VideoResponse: 包含 job_id 的响应对象
+        """
         return await self.generate(
             model=model,
             prompt=prompt,
@@ -496,7 +633,17 @@ class AsyncVideos:
         )
 
     async def get_job_status(self, job_id: str) -> VideoResponse:
-        """获取视频生成任务的状态。"""
+        """获取视频生成任务的状态（异步）。
+        
+        异步查询视频生成任务的当前状态。推荐在异步上下文中使用此方法
+        或与 async def wait() 方法结合使用。
+        
+        Args:
+            job_id: 视频生成任务的ID
+            
+        Returns:
+            VideoResponse: 包含任务状态和结果的响应对象
+        """
         response = await self._transport.request("GET", f"/generation/job/{job_id}", None)
         return self._parse_response(response)
 
@@ -509,7 +656,30 @@ class AsyncVideos:
         timeout: float = 600.0,
         on_progress: Optional[Callable[[float, Status], None]] = None,
     ) -> VideoResponse:
-        """异步等待视频任务完成。"""
+        """异步等待视频任务完成。
+        
+        这是一个异步阻塞调用，会异步轮询任务状态直到任务完成或发生超时。
+        推荐用于异步上下文中等待 text_to_video() 或 image_to_video() 返回的任务ID。
+
+        参数:
+            job_id: 视频生成任务的ID
+            max_attempts: 最大轮询次数（0表示无限制）
+            interval: 轮询间隔（秒，视频默认5秒）
+            timeout: 最大等待时间（秒，视频默认10分钟）
+            on_progress: 进度回调函数，接收 (progress: float, status: Status) 参数
+        
+        返回:
+            VideoResponse: 完成后的任务响应
+            
+        Example:
+            response = await client.videos.text_to_video(
+                model="sora-2",
+                prompt="A beautiful sunset over the ocean"
+            )
+            job_id = response.data[0].id
+            # 异步等待任务完成
+            result = await client.videos.wait(job_id)
+        """
         import asyncio
         import time
         
@@ -518,11 +688,11 @@ class AsyncVideos:
 
         while True:
             if max_attempts > 0 and attempts >= max_attempts:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"超过最大轮询次数 ({max_attempts})")
 
             if timeout > 0 and (time.time() - start_time) > timeout:
-                from onethingai.errors import TimeoutError
+                from onething_llm.errors import TimeoutError
                 raise TimeoutError(f"轮询超时 ({timeout}秒)")
 
             response = await self.get_job_status(job_id)
@@ -534,7 +704,7 @@ class AsyncVideos:
                 return response
 
             if response.data.is_failed():
-                from onethingai.errors import JobError
+                from onething_llm.errors import JobError
                 raise JobError(
                     f"任务失败: {response.data.error}",
                     job_id=job_id,

@@ -12,11 +12,11 @@ from typing import Any, Dict, Optional
 import openai
 from openai import OpenAI, AsyncOpenAI
 
-from onethingai.transport import Transport, AsyncTransport
-from onethingai.resources.text import Text
-from onethingai.resources.images import Images, AsyncImages
-from onethingai.resources.videos import Videos, AsyncVideos
-from onethingai.errors import OnethingAIError
+from onething_llm.transport import Transport, AsyncTransport
+from onething_llm.resources.text import Text
+from onething_llm.resources.images import Images, AsyncImages
+from onething_llm.resources.videos import Videos, AsyncVideos
+from onething_llm.errors import OnethingLLMError
 
 
 # 默认配置
@@ -26,9 +26,9 @@ DEFAULT_MAX_RETRIES = 3
 DEFAULT_POLLING_INTERVAL = 2.0
 
 
-class OnethingAI:
+class OnethingLLM:
     """
-    OneThing AI SDK 客户端
+    OneThing AI LLM SDK 客户端
 
     该客户端提供以下功能:
     - 自定义文本生成: client.text.chat(), client.text.completions(), client.text.responses()
@@ -38,9 +38,9 @@ class OnethingAI:
 
     使用示例:
         ```python
-        from onethingai import OnethingAI
+        from onething_llm import OnethingLLM
 
-        client = OnethingAI(api_key="your-api-key")
+        client = OnethingLLM(api_key="your-api-key")
 
         # 自定义文本生成 (使用 /generation 接口，通过 job_type 区分)
         response = client.text.chat(
@@ -102,7 +102,7 @@ class OnethingAI:
         初始化 OneThing AI 客户端
 
         Args:
-            api_key: 用于认证的 API 密钥。如果未提供，将从 ONETHINGAI_API_KEY 环境变量获取。
+            api_key: 用于认证的 API 密钥。如果未提供，将从 ONETHING_LLM_API_KEY 环境变量获取。
             base_url: API 基础地址。默认为 https://api-model.onethingai.com/v2
             timeout: 请求超时时间（秒）
             max_retries: 请求失败时的最大重试次数
@@ -111,12 +111,12 @@ class OnethingAI:
             openai_client: 可选的预配置 OpenAI 客户端，用于 OpenAI 兼容功能
         """
         # 如果未提供，从环境变量获取 API 密钥
-        self._api_key = api_key or os.environ.get("ONETHINGAI_API_KEY", "")
+        self._api_key = api_key or os.environ.get("ONETHING_LLM_API_KEY", "")
         if not self._api_key:
-            raise OnethingAIError("API 密钥是必需的。请设置 ONETHINGAI_API_KEY 环境变量或传入 api_key 参数。")
+            raise OnethingLLMError("API 密钥是必需的。请设置 ONETHING_LLM_API_KEY 环境变量或传入 api_key 参数。")
 
         # 如果未提供，从环境变量获取基础地址
-        self._base_url = base_url or os.environ.get("ONETHINGAI_BASE_URL", DEFAULT_BASE_URL)
+        self._base_url = base_url or os.environ.get("ONETHING_LLM_BASE_URL", DEFAULT_BASE_URL)
         self._timeout = timeout
         self._max_retries = max_retries
         self._polling_interval = polling_interval
@@ -188,26 +188,26 @@ class OnethingAI:
         self._transport.close()
         self._openai_client.close()
 
-    def __enter__(self) -> "OnethingAI":
+    def __enter__(self) -> "OnethingLLM":
         return self
 
     def __exit__(self, *args: Any) -> None:
         self.close()
 
 
-class AsyncOnethingAI:
+class AsyncOnethingLLM:
     """
-    异步 OneThing AI SDK 客户端
+    异步 OneThing AI LLM SDK 客户端
 
     该客户端提供对 OneThing AI 服务的异步访问。
 
     使用示例:
         ```python
         import asyncio
-        from onethingai import AsyncOnethingAI
+        from onething_llm import AsyncOnethingLLM
 
         async def main():
-            client = AsyncOnethingAI(api_key="your-api-key")
+            client = AsyncOnethingLLM(api_key="your-api-key")
 
             # 异步图片生成
             response = await client.images.generate(
@@ -249,11 +249,11 @@ class AsyncOnethingAI:
             headers: 请求中包含的自定义头部
             openai_client: 可选的预配置 AsyncOpenAI 客户端
         """
-        self._api_key = api_key or os.environ.get("ONETHINGAI_API_KEY", "")
+        self._api_key = api_key or os.environ.get("ONETHING_LLM_API_KEY", "")
         if not self._api_key:
-            raise OnethingAIError("API 密钥是必需的。请设置 ONETHINGAI_API_KEY 环境变量或传入 api_key 参数。")
+            raise OnethingLLMError("API 密钥是必需的。请设置 ONETHING_LLM_API_KEY 环境变量或传入 api_key 参数。")
 
-        self._base_url = base_url or os.environ.get("ONETHINGAI_BASE_URL", DEFAULT_BASE_URL)
+        self._base_url = base_url or os.environ.get("ONETHING_LLM_BASE_URL", DEFAULT_BASE_URL)
         self._timeout = timeout
         self._max_retries = max_retries
         self._polling_interval = polling_interval
@@ -304,8 +304,9 @@ class AsyncOnethingAI:
         await self._transport.close()
         await self._openai_client.close()
 
-    async def __aenter__(self) -> "AsyncOnethingAI":
+    async def __aenter__(self) -> "AsyncOnethingLLM":
         return self
 
     async def __aexit__(self, *args: Any) -> None:
         await self.close()
+

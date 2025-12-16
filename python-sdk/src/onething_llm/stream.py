@@ -7,7 +7,7 @@ OneThing AI SDK 流式响应读取器模块
 import json
 from typing import Any, AsyncIterator, Dict, Generic, Iterator, Optional, TypeVar
 
-from onethingai.types import (
+from onething_llm.types import (
     ImageResult,
     ImageStreamDataResponse,
     StreamDataResponse,
@@ -15,7 +15,7 @@ from onethingai.types import (
     VideoResult,
     VideoStreamDataResponse,
 )
-from onethingai.errors import StreamError
+from onething_llm.errors import StreamError
 
 
 T = TypeVar("T")

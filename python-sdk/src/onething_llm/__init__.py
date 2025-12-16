@@ -1,12 +1,11 @@
 """
-OneThing AI Python SDK
+OneThing AI LLM Python SDK
 
 用于访问 OneThing AI 平台的综合 SDK，支持文本、图片和视频生成。
-文本生成基于 OpenAI 客户端构建，以保持兼容性。
 """
 
-from onethingai.client import AsyncOnethingAI, OnethingAI
-from onethingai.types import (
+from onething_llm.client import AsyncOnethingLLM, OnethingLLM
+from onething_llm.types import (
     ImageDataResponse,
     ImageExtra,
     ImageJobType,
@@ -27,8 +26,8 @@ from onethingai.types import (
     VideoRequest,
     VideoResult,
 )
-from onethingai.errors import (
-    OnethingAIError,
+from onething_llm.errors import (
+    OnethingLLMError,
     APIError,
     AuthenticationError,
     RateLimitError,
@@ -38,10 +37,8 @@ from onethingai.errors import (
 __version__ = "1.0.0"
 
 __all__ = [
-    # 客户端
-    "OnethingAI",
-    "AsyncOnethingAI",
-    # 类型定义
+    "OnethingLLM",
+    "AsyncOnethingLLM",
     "SyncMode",
     "InputImage",
     "InputVideo",
@@ -61,8 +58,7 @@ __all__ = [
     "VideoDataResponse",
     "StreamEventType",
     "StreamDataResponse",
-    # 错误类型
-    "OnethingAIError",
+    "OnethingLLMError",
     "APIError",
     "AuthenticationError",
     "RateLimitError",

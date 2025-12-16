@@ -10,7 +10,7 @@ from typing import Any, AsyncIterator, Dict, Iterator, Optional, Union
 
 import httpx
 
-from onethingai.errors import APIError, raise_for_status
+from onething_llm.errors import APIError, raise_for_status
 
 
 class Transport:
@@ -40,7 +40,7 @@ class Transport:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
-            "User-Agent": "onethingai-python-sdk/1.0.0",
+            "User-Agent": "onething-llm-python-sdk/1.0.0",
         }
         headers.update(self.custom_headers)
         return headers
@@ -193,7 +193,7 @@ class AsyncTransport:
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
-            "User-Agent": "onethingai-python-sdk/1.0.0",
+            "User-Agent": "onething-llm-python-sdk/1.0.0",
         }
         headers.update(self.custom_headers)
         return headers

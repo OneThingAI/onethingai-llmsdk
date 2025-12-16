@@ -3,8 +3,8 @@ OneThing AI 文本生成资源
 """
 
 from typing import Any, Dict, List, Optional
-from onethingai.transport import Transport
-from onethingai.types import TextJobType
+from onething_llm.transport import Transport
+from onething_llm.types import TextJobType
 
 
 class Text:

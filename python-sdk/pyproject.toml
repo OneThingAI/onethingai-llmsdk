@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "onethingai"
+name = "onethingai-llmsdk"
 version = "1.0.0"
-description = "OneThing AI Python SDK - Text, Image and Video Generation with unified v2 API"
+description = "OneThing AI LLM SDK - Text, Image and Video Generation with unified v2 API"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -42,7 +42,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/onethingai"]
+packages = ["src/onething_llm"]
 
 [tool.black]
 line-length = 100

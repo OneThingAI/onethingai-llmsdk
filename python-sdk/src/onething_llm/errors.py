@@ -1,5 +1,5 @@
 """
-OneThing AI SDK 错误类型模块
+OneThing AI LLM SDK 错误类型模块
 
 定义了 SDK 中使用的所有异常类型。
 """
@@ -7,15 +7,15 @@ OneThing AI SDK 错误类型模块
 from typing import Any, Optional
 
 
-class OnethingAIError(Exception):
-    """OneThing AI SDK 基础错误类"""
+class OnethingLLMError(Exception):
+    """OneThing AI LLM SDK 基础错误类"""
 
     def __init__(self, message: str) -> None:
         self.message = message
         super().__init__(message)
 
 
-class APIError(OnethingAIError):
+class APIError(OnethingLLMError):
     """API 错误，包含状态码和响应体"""
 
     def __init__(
@@ -65,7 +65,7 @@ class RateLimitError(APIError):
         super().__init__(message, status_code, body, request_id)
 
 
-class ValidationError(OnethingAIError):
+class ValidationError(OnethingLLMError):
     """请求参数验证错误"""
 
     def __init__(self, field: str, message: str) -> None:
@@ -73,7 +73,7 @@ class ValidationError(OnethingAIError):
         super().__init__(f"字段 '{field}' 验证失败: {message}")
 
 
-class JobError(OnethingAIError):
+class JobError(OnethingLLMError):
     """任务执行错误"""
 
     def __init__(
@@ -87,14 +87,14 @@ class JobError(OnethingAIError):
         super().__init__(message)
 
 
-class TimeoutError(OnethingAIError):
+class TimeoutError(OnethingLLMError):
     """请求或轮询超时错误"""
 
     def __init__(self, message: str = "请求超时") -> None:
         super().__init__(message)
 
 
-class StreamError(OnethingAIError):
+class StreamError(OnethingLLMError):
     """流式处理错误"""
 
     def __init__(self, message: str, error_data: Optional[Any] = None) -> None:

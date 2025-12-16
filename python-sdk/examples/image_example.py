@@ -1,15 +1,15 @@
 """
 图片生成示例
 
-演示如何使用 OneThing AI SDK 进行图片生成，支持多种模型和参数配置。
+演示如何使用 OneThing AI LLM SDK 进行图片生成，支持多种模型和参数配置。
 """
 
 import os
 import base64
 from datetime import datetime
 from pathlib import Path
-from onethingai import OnethingAI
-from onethingai.types import ImageJobType, ResponseFormat
+from onething_llm import OnethingLLM
+from onething_llm.types import ImageJobType, ResponseFormat
 
 
 def save_image_from_url(image_url: str, filename: str) -> str:
@@ -45,10 +45,10 @@ def save_image_from_base64(b64_data: str, filename: str) -> str:
 def text_to_image_example():
     """文本生成图片示例"""
     # 设置 API 密钥
-    api_key = os.environ.get("ONETHINGAI_API_KEY", "your-api-key")
+    api_key = os.environ.get("ONETHING_LLM_API_KEY", "6c5cd6d9f92101f463709726fd2bbebf")
     
     # 创建客户端
-    client = OnethingAI(api_key=api_key)
+    client = OnethingLLM(api_key=api_key)
 
     print("🎨 文本生成图片示例:")
     print("="*60)
@@ -72,7 +72,6 @@ def text_to_image_example():
                 width=1024,
                 height=1024,
                 response_format=ResponseFormat.URL,  # 先用URL格式
-                style="vivid"  # 生动风格
             )
             
             print(f"✅ 生成成功！")
@@ -152,7 +151,7 @@ def image_edit_example(client):
 
 def main():
     """主函数"""
-    print("🖼️  OneThing AI SDK - Gemini 3 Pro Image 图片生成示例集合")
+    print("🖼️  OneThing AI LLM SDK - Gemini 3 Pro Image 图片生成示例集合")
     print("="*80)
     
     try:
